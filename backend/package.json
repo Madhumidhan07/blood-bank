@@ -1,0 +1,26 @@
+{
+  "name": "bloodbank-backend",
+  "version": "2.0.0",
+  "description": "Blood Bank Connect - Node.js/Express/Firebase (Firestore) backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "check": "node --check server.js && node --check controllers/userController.js && node --check controllers/requestController.js && node --check models/userModel.js && node --check models/requestModel.js && node --check middleware/authMiddleware.js && node --check config/firebase.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.3.1",
+    "firebase-admin": "^12.3.1",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blood Bank Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- UPDATE 14 & 16: External CSS file instead of inline styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- UPDATE 18: Toast container for notifications -->
+  <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="hidden">
+    <div class="spinner-border text-danger" role="status"><span class="visually-hidden">Loading…</span></div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg bg-white sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#" data-nav="home">🩸 Blood Bank Connect</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
+        aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-lg-3">
+          <li class="nav-item"><a class="nav-link" data-nav="home">Home</a></li>
+          <li class="nav-item"><a class="nav-link" data-nav="donors">Find Donors</a></li>
+          <li class="nav-item"><a class="nav-link" data-nav="requests">Requests</a></li>
+          <li class="nav-item nav-auth" id="navRegister"><a class="nav-link" data-nav="register">Register</a></li>
+          <li class="nav-item nav-auth" id="navLogin"><a class="nav-link" data-nav="login">Login</a></li>
+          <li class="nav-item dropdown hidden" id="profileMenu">
+            <a class="nav-link dropdown-toggle fw-semibold" href="#" role="button" data-bs-toggle="dropdown">Account</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header" id="welcomeName">Welcome</h6></li>
+              <li><a class="dropdown-item" data-nav="dashboard">Dashboard</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" id="logoutBtn">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="container py-5">
+
+    <!-- HOME / HERO -->
+    <section id="view-home" class="hero py-5">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-6">
+          <span class="badge bb-badge mb-3">Community Blood Support</span>
+          <h1 class="display-5 fw-bold">Find a donor. Save a life.</h1>
+          <p class="lead text-secondary">A portal for donors and recipients to connect quickly by blood group and location.</p>
+          <div class="d-flex gap-3">
+            <a class="btn bb-btn btn-lg text-white" data-nav="register">Become a Donor</a>
+            <a class="btn btn-outline-dark btn-lg" data-nav="donors">Find Donors</a>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card p-4">
+            <h5 class="mb-3">Quick Search</h5>
+            <form id="quickSearchForm" class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label required">Blood Group</label>
+                <select class="form-select" name="blood_group" required>
+                  <option value="">Select…</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">City / Area</label>
+                <input class="form-control" name="location" placeholder="e.g., Chennai" />
+              </div>
+              <div class="col-12 d-grid d-sm-flex gap-3">
+                <button class="btn bb-btn text-white" type="submit">Search</button>
+                <a class="btn btn-outline-secondary" data-nav="register">Register as Donor</a>
+              </div>
+            </form>
+            <div id="quickResults" class="mt-4"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGISTER -->
+    <section id="view-register" class="hidden">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="card p-4">
+            <h3 class="mb-1">Donor Registration</h3>
+            <p class="text-secondary mb-4">Create your donor profile so recipients can reach you.</p>
+            <form id="registerForm" class="row g-3" novalidate>
+              <div class="col-md-6">
+                <label class="form-label required">Full Name</label>
+                <input class="form-control" name="name" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label required">Email</label>
+                <input type="email" class="form-control" name="email" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label required">Phone</label>
+                <input class="form-control" name="phone" pattern="[0-9]{10}" placeholder="10-digit number" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label required">Blood Group</label>
+                <select class="form-select" name="blood_group" required>
+                  <option value="">Select…</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label required">City</label>
+                <input class="form-control" name="location" required />
+              </div>
+              <!-- UPDATE 2: Password never stored in plain text — sent to backend and hashed -->
+              <div class="col-md-6">
+                <label class="form-label required">Password</label>
+                <input type="password" class="form-control" name="password" minlength="6" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Availability Notes</label>
+                <input class="form-control" name="notes" placeholder="e.g., Available weekends only" />
+              </div>
+              <div class="col-12 d-grid d-sm-flex gap-3">
+                <button class="btn bb-btn text-white" type="submit" id="registerBtn">Create Account</button>
+                <a class="btn btn-outline-secondary" data-nav="login">I already have an account</a>
+              </div>
+            </form>
+            <div id="registerMsg" class="mt-3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGIN -->
+    <section id="view-login" class="hidden">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card p-4">
+            <h3 class="mb-1">Login</h3>
+            <p class="text-secondary mb-4">Access your dashboard to post and manage requests.</p>
+            <form id="loginForm" class="row g-3" novalidate>
+              <div class="col-12">
+                <label class="form-label required">Email</label>
+                <input type="email" class="form-control" name="email" required />
+              </div>
+              <div class="col-12">
+                <label class="form-label required">Password</label>
+                <input type="password" class="form-control" name="password" required />
+              </div>
+              <div class="col-12 d-grid d-sm-flex gap-3">
+                <button class="btn bb-btn text-white" type="submit" id="loginBtn">Login</button>
+                <a class="btn btn-outline-secondary" data-nav="register">Create an account</a>
+              </div>
+            </form>
+            <div id="loginMsg" class="mt-3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FIND DONORS -->
+    <section id="view-donors" class="hidden">
+      <div class="card p-4">
+        <div class="d-flex flex-wrap align-items-end gap-3 mb-3">
+          <div>
+            <h3 class="mb-1">Find Donors</h3>
+            <p class="text-secondary mb-0">Search by blood group and city.</p>
+          </div>
+        </div>
+        <!-- UPDATE 7: Show availability filter -->
+        <form id="donorSearchForm" class="row g-3 mb-3">
+          <div class="col-md-3">
+            <label class="form-label">Blood Group</label>
+            <select class="form-select" name="blood_group">
+              <option value="">Any</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">City</label>
+            <input class="form-control" name="location" placeholder="e.g., Coimbatore" />
+          </div>
+          <div class="col-md-3 align-self-end d-grid d-sm-block">
+            <button class="btn bb-btn text-white" type="submit">Search</button>
+          </div>
+        </form>
+        <div class="table-responsive">
+          <!-- UPDATE 4: Fixed HTML bug - removed stray </thead> tag -->
+          <table class="table align-middle" id="donorTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Blood Group</th>
+                <th>City</th>
+                <th>Status</th><!-- UPDATE 7 -->
+                <th>Contact</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody><tr><td colspan="6" class="text-center text-secondary py-4">Use search above to find donors.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- REQUESTS -->
+    <section id="view-requests" class="hidden">
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="card p-4 h-100">
+            <h3 class="mb-1">Post a Blood Request</h3>
+            <p class="text-secondary">You must be logged in to post.</p>
+            <form id="requestForm" class="row g-3" novalidate>
+              <div class="col-md-6">
+                <label class="form-label required">Patient Name</label>
+                <input class="form-control" name="patient_name" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label required">Hospital</label>
+                <input class="form-control" name="hospital" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label required">City</label>
+                <input class="form-control" name="location" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label required">Blood Group</label>
+                <select class="form-select" name="blood_group" required>
+                  <option value="">Select…</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label required">Date Needed</label>
+                <input type="date" class="form-control" name="date_needed" required />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Urgency</label>
+                <select class="form-select" name="urgency">
+                  <option>Normal</option><option>High</option><option>Critical</option>
+                </select>
+              </div>
+              <div class="col-12 d-grid d-sm-flex gap-3">
+                <button class="btn bb-btn text-white" type="submit" id="requestBtn">Post Request</button>
+                <span class="align-self-center small text-secondary">Posting as <span id="postingAs">Guest</span></span>
+              </div>
+            </form>
+            <div id="requestMsg" class="mt-3"></div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div>
+                <h3 class="mb-1">Active Requests</h3>
+                <p class="text-secondary mb-0">Contact the requester directly.</p>
+              </div>
+              <div class="input-group" style="max-width:260px">
+                <span class="input-group-text">Filter</span>
+                <select class="form-select" id="filterByGroup">
+                  <option value="">All</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle" id="requestTable">
+                <thead>
+                  <tr>
+                    <th>Patient</th><th>Blood Group</th><th>City</th>
+                    <th>Hospital</th><th>Date</th><th>Urgency</th><th>Contact</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="hidden">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="card p-4 h-100">
+            <!-- UPDATE 6: Profile view + edit -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="mb-0">Your Profile</h4>
+              <button class="btn btn-sm btn-outline-secondary" id="editProfileBtn">Edit</button>
+            </div>
+            <dl class="row mb-3" id="profileDetails"></dl>
+
+            <!-- UPDATE 6: Edit Profile Form (hidden by default) -->
+            <form id="editProfileForm" class="hidden row g-3">
+              <div class="col-12">
+                <label class="form-label">Full Name</label>
+                <input class="form-control" name="name" />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Phone</label>
+                <input class="form-control" name="phone" pattern="[0-9]{10}" />
+              </div>
+              <div class="col-12">
+                <label class="form-label">City</label>
+                <input class="form-control" name="location" />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Blood Group</label>
+                <select class="form-select" name="blood_group">
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Notes</label>
+                <input class="form-control" name="notes" />
+              </div>
+              <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn bb-btn text-white btn-sm">Save</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="cancelEditBtn">Cancel</button>
+              </div>
+              <div id="editProfileMsg"></div>
+            </form>
+
+            <!-- UPDATE 7: Availability toggle -->
+            <div class="mt-3 pt-3 border-top">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">Donor Availability</span>
+                <span id="availabilityBadge" class="availability-on">Available</span>
+              </div>
+              <button class="btn btn-outline-secondary btn-sm mt-2 w-100" id="toggleAvailBtn">Toggle Status</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h4 class="mb-0">Your Requests</h4>
+              <small class="text-secondary">Click ✕ to remove</small>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle" id="myRequestTable">
+                <thead>
+                  <tr>
+                    <th>Patient</th><th>Blood Group</th><th>City</th>
+                    <th>Hospital</th><th>Date</th><th>Urgency</th><th></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container py-4 small text-center text-secondary">
+    Blood Bank Connect &mdash; data stored securely in Firebase Firestore. Built with Node.js + Express.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const API = '/api';
+    const views = ['home', 'register', 'login', 'donors', 'requests', 'dashboard'];
+    let _token = sessionStorage.getItem('bb_token') || null;
+    let _currentUser = null;
+
+    try { _currentUser = JSON.parse(sessionStorage.getItem('bb_user') || 'null'); }
+    catch { sessionStorage.removeItem('bb_user'); }
+
+    const escapeHTML = value => String(value ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    const safePhone = value => String(value ?? '').replace(/[^0-9]/g, '').slice(-15);
+    const safeEmail = value => String(value ?? '').trim();
+    const formatDate = value => value ? String(value).slice(0, 10) : '-';
+
+    function saveSession(token, user) {
+      _token = token; _currentUser = user;
+      sessionStorage.setItem('bb_token', token);
+      sessionStorage.setItem('bb_user', JSON.stringify(user));
+    }
+    function clearSession() {
+      _token = null; _currentUser = null;
+      sessionStorage.removeItem('bb_token');
+      sessionStorage.removeItem('bb_user');
+    }
+    function getToken() { return _token; }
+    function getCurrentUser() { return _currentUser; }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const id = 'toast-' + Date.now();
+      const bgClass = type === 'success' ? 'text-bg-success' : type === 'danger' ? 'text-bg-danger' : 'text-bg-warning';
+      const el = document.createElement('div');
+      el.id = id; el.className = `toast align-items-center ${bgClass} border-0`; el.setAttribute('role', 'alert');
+      el.innerHTML = `<div class="d-flex"><div class="toast-body fw-semibold"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+      el.querySelector('.toast-body').textContent = message;
+      container.appendChild(el);
+      const toast = new bootstrap.Toast(el, { delay: 3500 });
+      toast.show(); el.addEventListener('hidden.bs.toast', () => el.remove());
+    }
+
+    function setLoading(show) { document.getElementById('loadingOverlay').classList.toggle('hidden', !show); }
+
+    async function apiFetch(path, options = {}) {
+      const headers = { ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) };
+      if (getToken()) headers.Authorization = 'Bearer ' + getToken();
+      let res;
+      try { res = await fetch(API + path, { ...options, headers }); }
+      catch { throw new Error('Unable to connect to the server. Please check your internet connection.'); }
+      const text = await res.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = {}; }
+      if (res.status === 401 && getToken()) {
+        clearSession(); setAuthUI();
+        if (!['login', 'register'].includes(document.querySelector('section:not(.hidden)')?.id?.replace('view-', ''))) show('login');
+      }
+      if (!res.ok) {
+        const msg = Array.isArray(data.errors) ? data.errors.join(' ') : (data.error || 'Something went wrong.');
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    function show(view) {
+      if (!views.includes(view)) view = 'home';
+      if (view === 'dashboard' && !getCurrentUser()) { showToast('Please login first.', 'warning'); view = 'login'; }
+      views.forEach(v => document.getElementById('view-' + v)?.classList.add('hidden'));
+      document.getElementById('view-' + view)?.classList.remove('hidden');
+      document.querySelectorAll('[data-nav]').forEach(a => a.classList.remove('active'));
+      document.querySelectorAll(`[data-nav="${view}"]`).forEach(a => a.classList.add('active'));
+      if (view === 'donors') loadDonors();
+      if (view === 'requests') { loadRequests(); updatePostingAs(); }
+      if (view === 'dashboard') { loadProfile(); loadMyRequests(); }
+      const nav = document.getElementById('nav');
+      if (nav?.classList.contains('show')) bootstrap.Collapse.getOrCreateInstance(nav).hide();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('[data-nav]').forEach(el => el.addEventListener('click', e => { e.preventDefault(); show(el.getAttribute('data-nav')); }));
+
+    function setAuthUI() {
+      const me = getCurrentUser();
+      document.getElementById('profileMenu').classList.toggle('hidden', !me);
+      document.getElementById('navLogin').classList.toggle('hidden', !!me);
+      document.getElementById('navRegister').classList.toggle('hidden', !!me);
+      if (me) document.getElementById('welcomeName').textContent = me.name || 'Account';
+    }
+    setAuthUI();
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      clearSession(); setAuthUI(); show('home'); showToast('Logged out successfully.', 'warning');
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('registerBtn'); btn.disabled = true; btn.textContent = 'Creating…';
+      document.getElementById('registerMsg').textContent = '';
+      try {
+        const data = await apiFetch('/users/register', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(e.target))) });
+        saveSession(data.token, data.user); setAuthUI(); e.target.reset();
+        showToast('Account created! Welcome, ' + data.user.name); setTimeout(() => show('dashboard'), 300);
+      } catch (err) { document.getElementById('registerMsg').innerHTML = `<div class="alert alert-danger"></div>`; document.querySelector('#registerMsg .alert').textContent = err.message; }
+      finally { btn.disabled = false; btn.textContent = 'Create Account'; }
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn'); btn.disabled = true; btn.textContent = 'Logging in…';
+      document.getElementById('loginMsg').textContent = '';
+      try {
+        const data = await apiFetch('/users/login', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(e.target))) });
+        saveSession(data.token, data.user); setAuthUI(); e.target.reset();
+        showToast('Welcome back, ' + data.user.name + '!'); setTimeout(() => show('dashboard'), 300);
+      } catch (err) { document.getElementById('loginMsg').innerHTML = `<div class="alert alert-danger"></div>`; document.querySelector('#loginMsg .alert').textContent = err.message; }
+      finally { btn.disabled = false; btn.textContent = 'Login'; }
+    });
+
+    document.getElementById('quickSearchForm').addEventListener('submit', async e => {
+      e.preventDefault(); const fd = new FormData(e.target);
+      const params = new URLSearchParams({ blood_group: fd.get('blood_group') || '', location: fd.get('location') || '' });
+      const box = document.getElementById('quickResults'); box.textContent = 'Searching…';
+      try { box.innerHTML = donorTableHTML(await apiFetch('/users/donors?' + params)); }
+      catch (err) { box.innerHTML = `<div class="alert alert-danger"></div>`; box.querySelector('.alert').textContent = err.message; }
+    });
+
+    async function loadDonors(params = '') {
+      setLoading(true);
+      try { renderDonorTable(await apiFetch('/users/donors' + (params ? '?' + params : ''))); }
+      catch (err) { showToast('Could not load donors: ' + err.message, 'danger'); }
+      finally { setLoading(false); }
+    }
+
+    function contactHTML(u) {
+      const phone = safePhone(u.phone), email = safeEmail(u.email);
+      return `${phone ? `<a href="tel:${phone}" class="text-dark me-2"><i class="bi bi-telephone-fill"></i></a><a href="https://wa.me/${phone}" target="_blank" rel="noopener noreferrer" class="text-success me-2"><i class="bi bi-whatsapp"></i></a>` : ''}${email ? `<a href="mailto:${escapeHTML(email)}" class="text-primary"><i class="bi bi-envelope-fill"></i></a>` : ''}`;
+    }
+    function donorTableHTML(donors) {
+      if (!donors.length) return '<div class="alert alert-warning">No donors found. Try a different city.</div>';
+      return `<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Name</th><th>Blood</th><th>City</th><th>Contact</th><th>Notes</th></tr></thead><tbody>${donors.map(u => `<tr><td class="fw-semibold">${escapeHTML(u.name)}</td><td><span class="badge bb-badge">${escapeHTML(u.blood_group)}</span></td><td>${escapeHTML(u.location)}</td><td>${contactHTML(u)}</td><td>${escapeHTML(u.notes || '')}</td></tr>`).join('')}</tbody></table></div>`;
+    }
+    function renderDonorTable(donors) {
+      const tbody = document.querySelector('#donorTable tbody');
+      tbody.innerHTML = donors.length ? donors.map(u => `<tr><td class="fw-semibold">${escapeHTML(u.name)}</td><td><span class="badge bb-badge">${escapeHTML(u.blood_group)}</span></td><td>${escapeHTML(u.location)}</td><td><span class="${u.available !== false ? 'availability-on' : 'availability-off'}">${u.available !== false ? 'Available' : 'Unavailable'}</span></td><td>${contactHTML(u)}</td><td>${escapeHTML(u.notes || '')}</td></tr>`).join('') : '<tr><td colspan="6" class="text-center text-secondary py-4">No donors found.</td></tr>';
+    }
+
+    document.getElementById('donorSearchForm').addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(e.target); await loadDonors(new URLSearchParams({ blood_group: fd.get('blood_group') || '', location: fd.get('location') || '' }).toString()); });
+
+    async function loadRequests() {
+      const group = document.getElementById('filterByGroup').value; setLoading(true);
+      try { renderRequestTable(await apiFetch('/requests' + (group ? '?blood_group=' + encodeURIComponent(group) : ''))); }
+      catch (err) { showToast('Could not load requests: ' + err.message, 'danger'); }
+      finally { setLoading(false); }
+    }
+    function badgeByUrgency(u) { return u === 'Critical' ? 'text-bg-danger' : u === 'High' ? 'text-bg-warning' : 'text-bg-secondary'; }
+    function renderRequestTable(requests) {
+      const tbody = document.querySelector('#requestTable tbody');
+      tbody.innerHTML = requests.length ? requests.map(r => `<tr><td>${escapeHTML(r.patient_name)}</td><td><span class="badge bb-badge">${escapeHTML(r.blood_group)}</span></td><td>${escapeHTML(r.location)}</td><td>${escapeHTML(r.hospital)}</td><td>${escapeHTML(formatDate(r.date_needed))}</td><td><span class="badge ${badgeByUrgency(r.urgency)}">${escapeHTML(r.urgency)}</span></td><td>${r.contact ? contactHTML(r.contact) : ''}</td></tr>`).join('') : '<tr><td colspan="7" class="text-center text-secondary">No active requests.</td></tr>';
+    }
+    document.getElementById('filterByGroup').addEventListener('change', loadRequests);
+    function updatePostingAs() { document.getElementById('postingAs').textContent = getCurrentUser()?.name || 'Guest (please login)'; }
+
+    document.getElementById('requestForm').addEventListener('submit', async e => {
+      e.preventDefault(); if (!getCurrentUser()) { showToast('Please login to post a request.', 'warning'); return; }
+      const btn = document.getElementById('requestBtn'); btn.disabled = true; btn.textContent = 'Posting…';
+      try { await apiFetch('/requests', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(e.target))) }); e.target.reset(); showToast('Blood request posted successfully!'); await loadRequests(); await loadMyRequests(); }
+      catch (err) { document.getElementById('requestMsg').innerHTML = '<div class="alert alert-danger"></div>'; document.querySelector('#requestMsg .alert').textContent = err.message; }
+      finally { btn.disabled = false; btn.textContent = 'Post Request'; }
+    });
+
+    async function loadProfile() {
+      if (!getCurrentUser()) return;
+      try {
+        const u = await apiFetch('/users/profile');
+        const fields = [['Name', u.name], ['Email', u.email], ['Phone', u.phone], ['Blood Group', u.blood_group], ['City', u.location], ['Notes', u.notes || '-']];
+        document.getElementById('profileDetails').innerHTML = fields.map(([k,v]) => `<dt class="col-5 text-secondary">${escapeHTML(k)}</dt><dd class="col-7">${escapeHTML(v)}</dd>`).join('');
+        const form = document.getElementById('editProfileForm'); form.name.value=u.name||''; form.phone.value=u.phone||''; form.location.value=u.location||''; form.blood_group.value=u.blood_group||''; form.notes.value=u.notes||'';
+        const badge=document.getElementById('availabilityBadge'); badge.textContent=u.available !== false?'Available':'Unavailable'; badge.className=u.available !== false?'availability-on':'availability-off';
+      } catch (err) { showToast('Could not load profile: ' + err.message, 'danger'); }
+    }
+    document.getElementById('editProfileBtn').addEventListener('click', () => { document.getElementById('editProfileForm').classList.remove('hidden'); document.getElementById('profileDetails').classList.add('hidden'); document.getElementById('editProfileBtn').classList.add('hidden'); });
+    document.getElementById('cancelEditBtn').addEventListener('click', () => { document.getElementById('editProfileForm').classList.add('hidden'); document.getElementById('profileDetails').classList.remove('hidden'); document.getElementById('editProfileBtn').classList.remove('hidden'); });
+    document.getElementById('editProfileForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      try { const u=await apiFetch('/users/profile',{method:'PUT',body:JSON.stringify(Object.fromEntries(new FormData(e.target)))}); if(_currentUser){_currentUser.name=u.name;sessionStorage.setItem('bb_user',JSON.stringify(_currentUser));} setAuthUI(); document.getElementById('editProfileForm').classList.add('hidden'); document.getElementById('profileDetails').classList.remove('hidden'); document.getElementById('editProfileBtn').classList.remove('hidden'); showToast('Profile updated successfully!'); await loadProfile(); }
+      catch(err){document.getElementById('editProfileMsg').innerHTML='<div class="alert alert-danger"></div>';document.querySelector('#editProfileMsg .alert').textContent=err.message;}
+    });
+    document.getElementById('toggleAvailBtn').addEventListener('click', async () => { try { const data=await apiFetch('/users/availability',{method:'PATCH'}); const badge=document.getElementById('availabilityBadge'); badge.textContent=data.available?'Available':'Unavailable'; badge.className=data.available?'availability-on':'availability-off'; showToast('Availability updated: '+(data.available?'Available':'Unavailable')); } catch(err){showToast('Could not update availability: '+err.message,'danger');} });
+
+    async function loadMyRequests() {
+      if (!getCurrentUser()) return; const tbody=document.querySelector('#myRequestTable tbody');
+      try { const requests=await apiFetch('/requests/mine'); tbody.innerHTML=requests.length?requests.map(r=>`<tr data-id="${escapeHTML(r.id)}"><td>${escapeHTML(r.patient_name)}</td><td>${escapeHTML(r.blood_group)}</td><td>${escapeHTML(r.location)}</td><td>${escapeHTML(r.hospital)}</td><td>${escapeHTML(formatDate(r.date_needed))}</td><td>${escapeHTML(r.urgency)}</td><td><button class="btn btn-sm btn-outline-danger" data-delete-id="${escapeHTML(r.id)}" type="button">✕</button></td></tr>`).join(''):'<tr><td colspan="7" class="text-secondary">No requests yet.</td></tr>'; }
+      catch { tbody.innerHTML='<tr><td colspan="7" class="text-danger">Error loading requests.</td></tr>'; }
+    }
+    document.getElementById('myRequestTable').addEventListener('click', e => { const btn=e.target.closest('[data-delete-id]'); if(btn) deleteRequest(btn.dataset.deleteId); });
+    async function deleteRequest(id) {
+      if (!id || !confirm('Remove this request?')) return;
+      try { await apiFetch('/requests/' + encodeURIComponent(id), {method:'DELETE'}); showToast('Request removed.'); await loadMyRequests(); await loadRequests(); }
+      catch(err){showToast('Could not delete: '+err.message,'danger');}
+    }
+
+    show('home');
+  </script>
+</body>
+</html>

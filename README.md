@@ -150,3 +150,23 @@ Visit: [http://localhost:5000](http://localhost:5000)
 - **Update 9** — SMS/WhatsApp alerts: `npm install twilio` + add Twilio credentials in `.env`
 - **Update 10** — Admin panel: new `/admin` route with password-protected middleware
 - Deploy backend to Railway / Render / Cloud Run; Firestore is already cloud-hosted
+## 👥 Project Contributors
+
+This project was collaboratively developed by:
+
+* **Madhumidhan L** — [GitHub Profile](https://github.com/Madhumidhan07)
+* **Poovarasan** — [GitHub Profile](https://github.com/poovarasan701)
+
+### Project
+
+**Blood Bank Management System**
+
+A web-based application designed to manage blood donor information and support blood donation management.
+
+### Technologies Used
+
+* Frontend: HTML, CSS, JavaScript
+* Backend: Node.js, Express.js
+* Database: Firebase Firestore
+
+/

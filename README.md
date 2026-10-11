@@ -168,5 +168,3 @@ A web-based application designed to manage blood donor information and support b
 * Frontend: HTML, CSS, JavaScript
 * Backend: Node.js, Express.js
 * Database: Firebase Firestore
-
-/
